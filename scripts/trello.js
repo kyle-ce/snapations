@@ -55,7 +55,7 @@ const BACKLOG_CARDS = [
 
 // Fetch existing cards on the list
 const getCardsOnList = async (listId) => {
-  const url = `https://api.trello.com/1/lists/${listId}/cards?key=${API_KEY}&token=${TOKEN}`;
+  const url = `https://api.trello.com/1/lists/${listId}/cards?key=${process.env.TRELLO_API_KEY}&token=${process.env.TRELLO_TOKEN}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch list cards: ${res.status}`);
   return res.json();
@@ -79,7 +79,7 @@ const createCard = async (listId, { name, desc }) => {
 async function main() {
   try {
     console.log("Fetching existing cards on Backlog...");
-    const existingCards = await getCardsOnList(LIST_BACKLOG_ID);
+    const existingCards = await getCardsOnList(process.env.TRELLO_LIST_BACKLOG);
     const existingCardNames = new Set(existingCards.map((card) => card.name));
 
     for (const card of BACKLOG_CARDS) {
@@ -87,7 +87,7 @@ async function main() {
         // do nothing
       } else {
         console.log(`➕ Creating card: ${card.name}`);
-        await createCard(LIST_BACKLOG_ID, card);
+        await createCard(process.env.TRELLO_LIST_BACKLOG, card);
       }
     }
 

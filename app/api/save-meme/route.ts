@@ -1,12 +1,11 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
-import supabase from "@/lib/supabase";
+import { getAuthenticatedUser } from "@/lib/supabase/auth";
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
+  const { user, supabase, error } = await getAuthenticatedUser();
+
+  if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
     });
@@ -59,7 +58,7 @@ export async function POST(req: NextRequest) {
         imageUrl: publicUrl,
         user: {
           connect: {
-            email: session.user.email,
+            email: user.email,
           },
         },
       },

@@ -1,11 +1,10 @@
 import { NextRequest } from "next/server";
-import supabase from "@/lib/supabase";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
 import { generateCaptionFromImage } from "@/lib/caption";
+import { getAuthenticatedUser } from "@/lib/supabase/auth";
 
 export async function POST(request: NextRequest) {
+  // const {supabse, user, error} = getAuthenticatedUser() ;
   const formData = await request.formData();
   const file = formData.get("image") as File;
   if (!file) {
@@ -22,9 +21,6 @@ export async function POST(request: NextRequest) {
 
   //   const caption = await generateCaptionFromImage(file);
   const caption = "temp";
-
-  //   const session = await getServerSession(authOptions);
-  //   const user = session?.user;
 
   //   if (user) {
   //     await prisma.caption.create({

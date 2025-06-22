@@ -52,15 +52,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const saved = await prisma.caption.create({
+    const saved = await prisma.memes.create({
       data: {
         caption,
         imageUrl: publicUrl,
-        user: {
-          connect: {
-            email: user.email,
-          },
-        },
+        userId: user.id,
       },
     });
 

@@ -1,7 +1,5 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { generateCaptionFromImage } from "@/lib/caption";
-import { getAuthenticatedUser } from "@/lib/supabase/auth";
 
 export async function POST(request: NextRequest) {
   // const {supabse, user, error} = getAuthenticatedUser() ;
@@ -19,18 +17,9 @@ export async function POST(request: NextRequest) {
 
   const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/memes/${fileName}`;
 
-  //   const caption = await generateCaptionFromImage(file);
-  const caption = "temp";
-
-  //   if (user) {
-  //     await prisma.caption.create({
-  //       data: {
-  //         caption,
-  //         imageUrl: publicUrl,
-  //         user: { connect: { email: user.email! } },
-  //       },
-  //     });
-  //   }
+  // const caption = await generateCaptionFromImage(file);
+  const caption =
+    "this is static so I dont hav to pay for generating during development.";
 
   return new Response(JSON.stringify({ caption, imageUrl: publicUrl }), {
     status: 200,

@@ -1,0 +1,77 @@
+import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
+import supabase from "@/lib/supabase";
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+    });
+  }
+  const formData = await req.formData();
+  const file = formData.get("image") as File;
+  const caption = formData.get("caption") as string;
+
+  if (!caption || !file) {
+    return new Response(JSON.stringify({ error: "Missing fields" }), {
+      status: 400,
+    });
+  }
+
+  const fileExt = file.type.split("/")[1];
+  const fileName = `meme-${Date.now()}.${fileExt}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from("memes")
+    .upload(fileName, buffer, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    console.error(uploadError);
+    return new Response(JSON.stringify({ error: uploadError.message }), {
+      status: 500,
+    });
+  }
+
+  // Get public URL
+  const { data: publicUrlData } = supabase.storage
+    .from("memes")
+    .getPublicUrl(fileName);
+
+  const publicUrl = publicUrlData?.publicUrl;
+
+  if (!publicUrl) {
+    return new Response(JSON.stringify({ error: "Failed to get public URL" }), {
+      status: 500,
+    });
+  }
+
+  try {
+    const saved = await prisma.caption.create({
+      data: {
+        caption,
+        imageUrl: publicUrl,
+        user: {
+          connect: {
+            email: session.user.email,
+          },
+        },
+      },
+    });
+
+    return new Response(JSON.stringify(saved), {
+      status: 201,
+    });
+  } catch (error) {
+    console.error(error);
+    return new Response(JSON.stringify({ error: "Server error" }), {
+      status: 500,
+    });
+  }
+}

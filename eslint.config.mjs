@@ -10,6 +10,15 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    // ✅ This is how you ignore files/folders now
+    ignores: [
+      "app/generated/prisma/**/*", // ignore Prisma client
+      ".next/**/*", // ignore Next.js build output
+      "node_modules/**/*", // ignore deps
+      "dist/**/*", // ignore output if applicable
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 

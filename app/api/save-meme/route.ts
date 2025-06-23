@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/supabase/auth";
 
 export async function POST(req: NextRequest) {
-  const { user, supabase, error } = await getAuthenticatedUser();
+  const { user, supabase } = await getAuthenticatedUser();
 
   if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const fileName = `${user.id}/meme-${Date.now()}.${fileExt}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const { data: uploadData, error: uploadError } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("memes")
     .upload(fileName, buffer, {
       contentType: file.type,

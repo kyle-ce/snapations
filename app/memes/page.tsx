@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 
 export default async function MyMemesPage() {
-  const { user, error } = await getAuthenticatedUser();
+  const { user } = await getAuthenticatedUser();
 
   if (!user) {
     return (

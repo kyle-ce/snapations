@@ -3,7 +3,6 @@ import { generateCaptionFromImage } from "@/lib/caption";
 import { generateMeme } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
-  // const {supabse, user, error} = getAuthenticatedUser() ;
   const formData = await request.formData();
   const file = formData.get("image") as File;
   const manualCaption = formData.get("caption") as string | null;

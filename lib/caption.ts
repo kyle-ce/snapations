@@ -16,7 +16,7 @@ export async function generateCaptionFromImage(file: File): Promise<string> {
         content: [
           {
             type: "text",
-            text: "write meme like caption for this image.",
+            text: "You're a meme creator. Write a short, funny meme-style caption for this image. Limit to 10 words or fewer. Do not use emojis, hashtags, or excessive punctuation. Keep it readable and clever.",
           },
           {
             type: "image_url",

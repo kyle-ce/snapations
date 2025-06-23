@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   const fileExt = file.type.split("/")[1];
-  const fileName = `meme-${Date.now()}.${fileExt}`;
+  const fileName = `${user.id}/meme-${Date.now()}.${fileExt}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const { data: uploadData, error: uploadError } = await supabase.storage
@@ -52,15 +52,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const saved = await prisma.caption.create({
+    const saved = await prisma.memes.create({
       data: {
         caption,
         imageUrl: publicUrl,
-        user: {
-          connect: {
-            email: user.email,
-          },
-        },
+        userId: user.id,
       },
     });
 

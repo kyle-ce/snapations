@@ -1,6 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { createCanvas, loadImage, CanvasRenderingContext2D } from "canvas";
+import {
+  createCanvas,
+  loadImage,
+  CanvasRenderingContext2D,
+} from "@napi-rs/canvas";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

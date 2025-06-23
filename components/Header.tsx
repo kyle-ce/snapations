@@ -34,8 +34,8 @@ export default function Header() {
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer transition hover:scale-105">
                 <AvatarImage
-                  src={user.avatar_url || ""}
-                  alt={user.name || ""}
+                  src={user?.avatar_url || ""}
+                  alt={user?.name || ""}
                 />
                 <AvatarFallback>
                   {user?.name?.[0]?.toUpperCase() || (

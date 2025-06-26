@@ -1,11 +1,9 @@
 import { NextRequest } from "next/server";
 import { generateCaptionFromImage } from "@/lib/caption";
-import { generateMeme } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const file = formData.get("image") as File;
-  const manualCaption = formData.get("caption") as string | null;
 
   if (!file) {
     return new Response(JSON.stringify({ error: "No image provided" }), {
@@ -13,17 +11,11 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // If manual caption is provided, use it; otherwise use AI to generate
-  const caption = manualCaption?.trim()
-    ? manualCaption
-    : await generateCaptionFromImage(file);
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const memeBuffer = await generateMeme(buffer, caption);
+  // Generate caption using AI
+  const caption = await generateCaptionFromImage(file);
+  
   return new Response(
-    JSON.stringify({
-      caption,
-      meme: memeBuffer.toString("base64"),
-    }),
+    JSON.stringify({ caption }),
     {
       status: 200,
       headers: { "Content-Type": "application/json" },

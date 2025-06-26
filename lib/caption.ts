@@ -5,29 +5,37 @@ const openai = new OpenAI({
 });
 
 export async function generateCaptionFromImage(file: File): Promise<string> {
-  const arrayBuffer = await file.arrayBuffer();
-  const base64 = Buffer.from(arrayBuffer).toString("base64");
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
 
-  const res = await openai.chat.completions.create({
-    model: "gpt-4o", // or "gpt-4-vision-preview"
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: "You're a meme creator. Write a short, funny meme-style caption for this image. Limit to 10 words or fewer. Do not use emojis, hashtags, or excessive punctuation. Keep it readable and clever.",
-          },
-          {
-            type: "image_url",
-            image_url: {
-              url: `data:${file.type};base64,${base64}`,
-            },
-          },
-        ],
-      },
-    ],
-  });
+    const res = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a meme caption generator. Create short, witty captions that are funny and relatable. Keep them under 10 words, no emojis or hashtags.",
+        },
+        {
+          role: "user",
+          content: `I have an image. Please write a short, funny meme-style caption that would work well with it. Make it generic but humorous. Here's a hint about the image: ${base64.slice(
+            0,
+            50
+          )}... [truncated]`,
+        },
+      ],
+      max_tokens: 50,
+      temperature: 0.8,
+    });
 
-  return res.choices[0].message.content ?? "No caption generated.";
+    const caption = res.choices[0].message.content;
+    if (!caption) throw new Error("No caption generated");
+    return caption;
+  } catch (error) {
+    console.error("Caption generation error:", error);
+    throw new Error(
+      "Failed to generate caption. Please try again or write your own."
+    );
+  }
 }

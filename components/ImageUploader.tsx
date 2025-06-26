@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSupabaseSession } from "@/lib/supabase/hooks/useSession";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ImageDropZone } from "@/components/ImageDropZone";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { generateMemeInBrowser } from "@/lib/client-utils";
 
 export default function ImageUploader() {
   const session = useSupabaseSession();
@@ -15,33 +16,55 @@ export default function ImageUploader() {
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"ai" | "manual" | undefined>("ai");
 
+  const generateMeme = useCallback(async (text: string) => {
+    if (!image) return;
+    const memeBlob = await generateMemeInBrowser(image, text);
+    setMemeBlob(memeBlob);
+    const url = URL.createObjectURL(memeBlob);
+    setPreview(url);
+  }, [image]);
+
   const clearImage = () => {
     setImage(null);
     setPreview(null);
     setCaption("");
   };
 
+  // Debounce manual caption updates
+  useEffect(() => {
+    if (!image || mode !== "manual" || !caption) return;
+
+    const timer = setTimeout(() => {
+      generateMeme(caption).catch(console.error);
+    }, 500); // Wait 500ms after last keystroke
+
+    return () => clearTimeout(timer);
+  }, [caption, mode, image, generateMeme]);
+
   const generateCaption = async () => {
     if (!image) return;
     setLoading(true);
-    const formData = new FormData();
-    formData.append("image", image);
-    if (mode === "manual") formData.append("caption", caption);
-    const res = await fetch("/api/generate-caption", {
-      method: "POST",
-      body: formData,
-    });
-    if (res.ok) {
-      const { caption, meme } = await res.json();
-      setCaption(caption);
-      const blob = await (await fetch(`data:image/png;base64,${meme}`)).blob();
-      const url = URL.createObjectURL(blob);
-      setPreview(url);
-      setMemeBlob(blob);
-    } else {
+    try {
+      if (mode === "ai") {
+        const formData = new FormData();
+        formData.append("image", image);
+        const res = await fetch("/api/generate-caption", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) throw new Error("Failed to generate caption");
+        const data = await res.json();
+        setCaption(data.caption);
+        await generateMeme(data.caption);
+      } else {
+        await generateMeme(caption);
+      }
+    } catch (error) {
+      console.error("Error generating meme:", error);
       alert("Error generating meme");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSave = async () => {

@@ -1,7 +1,7 @@
 import EmptyState from "./_components/Empty";
 import { getAuthenticatedUser } from "@/lib/supabase/auth";
 import { prisma } from "@/lib/prisma";
-import { MemeCard } from "@/components/MemeCard";
+import { MemeGrid } from "@/components/MemeGrid";
 
 export default async function MyMemesPage() {
   const { user } = await getAuthenticatedUser();
@@ -24,15 +24,8 @@ export default async function MyMemesPage() {
   }
 
   return (
-    <section className="p-6 grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {memes.map((meme) => (
-        <MemeCard
-          key={meme.id}
-          id={meme.id}
-          imageUrl={meme.imageUrl}
-          caption={meme.caption}
-        />
-      ))}
+    <section className="container py-8 mx-auto">
+      <MemeGrid memes={memes} pageSize={12} />
     </section>
   );
 }

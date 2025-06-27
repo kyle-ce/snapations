@@ -1,4 +1,4 @@
-import { FaTimes, FaCloudUploadAlt } from "react-icons/fa";
+import { Upload, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -31,7 +31,7 @@ export function ImageDropZone({
             className="absolute top-2 right-2 opacity-0 hover:opacity-100"
             onClick={onClear}
           >
-            <FaTimes className="w-4 h-4 text-destructive" />
+            <X className="h-4 w-4 text-destructive" />
           </Button>
         </div>
       ) : (
@@ -39,7 +39,7 @@ export function ImageDropZone({
           htmlFor="file-upload"
           className="group flex flex-col items-center justify-center w-full h-48 p-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-accent transition"
         >
-          <FaCloudUploadAlt className="w-10 h-10 mb-2 text-muted-foreground group-hover:text-foreground" />
+          <Upload className="w-8 h-8 mb-2 text-muted-foreground group-hover:text-foreground" />
           <p className="text-sm text-muted-foreground">
             Click to upload or drag & drop
           </p>

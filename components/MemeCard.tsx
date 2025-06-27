@@ -60,12 +60,12 @@ export function MemeCard({ id, imageUrl, caption }: MemeCardProps) {
         <Button
           variant="destructive"
           size="icon"
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive"
           onClick={handleDelete}
           disabled={isDeleting}
         >
           {isDeleting ? (
-            <LoaderCircle className="animate-spin" />
+            <LoaderCircle className="h-4 w-4 animate-spin" />
           ) : (
             <Trash2 className="h-4 w-4" />
           )}

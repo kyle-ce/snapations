@@ -50,6 +50,14 @@ export default function ImageUploader() {
 
   const generateCaption = async () => {
     if (!image) return;
+    if (!session) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please sign in to use AI caption generation.",
+      });
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "ai") {
@@ -103,13 +111,19 @@ export default function ImageUploader() {
       });
       console.log(res.ok ? "Saved!" : "Failed: " + (await res.json()).error);
     } catch (error) {
+      console.error("Error saving meme:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save meme. Please try again.",
+      });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-card">
+    <div className="w-full max-w-4xl mx-auto rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-card animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
         <div className="w-full">
           <ImageDropZone
@@ -132,10 +146,10 @@ export default function ImageUploader() {
                 onValueChange={(val) => {
                   if (val) setMode(val as "ai" | "manual" | undefined);
                 }}
-                className="w-full"
+                className="w-full animate-in fade-in slide-in-from-bottom-1 duration-500"
               >
-                <ToggleGroupItem value="ai" className="flex-1">
-                  Use AI Caption
+                <ToggleGroupItem value="ai" className="flex-1 relative">
+                  AI Caption
                 </ToggleGroupItem>
                 <ToggleGroupItem value="manual" className="flex-1">
                   Write My Own
@@ -143,41 +157,58 @@ export default function ImageUploader() {
               </ToggleGroup>
 
               {mode === "manual" && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-1 duration-500">
                   <Textarea
                     placeholder="Write your caption..."
                     value={caption}
-                    onChange={(e) => {
-                      setCaption(e.target.value);
-                    }}
+                    onChange={(e) => setCaption(e.target.value)}
                   />
                 </div>
               )}
-              {mode === "ai" && (
-                <div className="space-y-4">
-                  <Button
-                    onClick={generateCaption}
-                    disabled={loading}
-                    className="w-full"
-                  >
-                    {loading ? "Generating..." : "Generate AI Caption"}
-                  </Button>
-                  {/* {caption && (
-                    <Textarea
-                      value={caption}
-                      onChange={(e) => setCaption(e.target.value)}
-                      className="mt-2"
-                    />
-                  )} */}
+              {mode === "ai" && caption && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-1 duration-500">
+                  <Textarea
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    className="mt-2"
+                  />
                 </div>
               )}
 
-              {caption && (
-                <Button onClick={handleSave} className="w-full">
-                  {saving && <LoaderCircle className=" animate-spin" />}Save
-                  Meme
+              <div className="grid gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                {mode === "ai" && (
+                  <Button
+                    onClick={generateCaption}
+                    disabled={loading || !image}
+                    title={
+                      !session
+                        ? "Sign in to use AI caption generation"
+                        : undefined
+                    }
+                    className="w-full"
+                  >
+                    {loading ? (
+                      <>
+                        <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      "Generate AI Caption"
+                    )}
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={handleSave}
+                  className="w-full"
+                  disabled={!caption}
+                >
+                  {saving && (
+                    <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  Save Meme
                 </Button>
-              )}
+              </div>
             </>
           ) : (
             <div className="h-full flex items-center justify-center text-muted-foreground">

@@ -19,16 +19,16 @@ export function ImageDropZone({
   return (
     <div className="w-full">
       {preview ? (
-        <div className="relative h-48">
+        <div className="relative min-h-48">
           <img
             src={preview}
             alt="Preview"
-            className="w-full h-full object-contain rounded-xl border border-gray-300 dark:border-gray-700"
+            className="object-cover rounded-xl border border-gray-300 dark:border-gray-700"
           />
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2"
+            className="absolute top-2 right-2 opacity-0 hover:opacity-100"
             onClick={onClear}
           >
             <FaTimes className="w-4 h-4 text-destructive" />

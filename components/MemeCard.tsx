@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { LoaderCircle, Trash2 } from "lucide-react";
 
 interface MemeCardProps {
   id: string;
@@ -20,7 +20,7 @@ export function MemeCard({ id, imageUrl, caption }: MemeCardProps) {
     if (!confirm("Are you sure you want to delete this meme?")) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/delete-meme?id=${id}`, {
+      const res = await fetch(`/api/delete-meme/${id}`, {
         method: "DELETE",
       });
 
@@ -54,7 +54,11 @@ export function MemeCard({ id, imageUrl, caption }: MemeCardProps) {
           onClick={handleDelete}
           disabled={isDeleting}
         >
-          <Trash2 className="h-4 w-4" />
+          {isDeleting ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>

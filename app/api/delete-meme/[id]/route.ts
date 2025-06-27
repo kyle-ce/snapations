@@ -2,7 +2,10 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/supabase/auth";
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const { user } = await getAuthenticatedUser();
     if (!user) {
@@ -11,7 +14,8 @@ export async function DELETE(request: NextRequest) {
       });
     }
 
-    const { memeId } = await request.json();
+    const memeId = params.id;
+    console.log("memeid", memeId);
     if (!memeId) {
       return new Response(JSON.stringify({ error: "Meme ID is required" }), {
         status: 400,

@@ -1,4 +1,5 @@
 import ImageUploader from "@/components/ImageUploader";
+import MemeGeneratorPage from "@/components/MemeGenerator";
 
 export default function HomePage() {
   return (
@@ -12,7 +13,7 @@ export default function HomePage() {
           own!
         </p>
       </section>
-
+      {/* <MemeGeneratorPage /> */}
       <ImageUploader />
     </main>
   );

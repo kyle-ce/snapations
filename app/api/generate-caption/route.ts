@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { generateCaptionFromImage } from "@/lib/caption";
+import { generateCaptionFromImage } from "@/lib/openai/caption";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -13,12 +13,9 @@ export async function POST(request: NextRequest) {
 
   // Generate caption using AI
   const caption = await generateCaptionFromImage(file);
-  
-  return new Response(
-    JSON.stringify({ caption }),
-    {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    }
-  );
+
+  return new Response(JSON.stringify({ caption }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }

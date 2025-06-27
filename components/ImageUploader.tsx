@@ -3,10 +3,16 @@ import { useState, useEffect, useCallback } from "react";
 import { useSupabaseSession } from "@/lib/supabase/hooks/useSession";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ImageDropZone } from "@/components/ImageDropZone";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { generateMemeInBrowser } from "@/lib/caption";
-import { LoaderCircle, Save, Wand2 } from "lucide-react";
+import { LoaderCircle, Save, Wand2, TextQuote, Type, Heading } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 
 export default function ImageUploader() {
@@ -18,6 +24,7 @@ export default function ImageUploader() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mode, setMode] = useState<"ai" | "manual" | undefined>("ai");
+  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const { toast } = useToast();
 
   // Track if there's a pending meme generation
@@ -28,7 +35,7 @@ export default function ImageUploader() {
       if (!image) return;
       setIsGenerating(true);
       try {
-        const memeBlob = await generateMemeInBrowser(image, text);
+        const memeBlob = await generateMemeInBrowser(image, text, fontSize);
         setMemeBlob(memeBlob);
         const url = URL.createObjectURL(memeBlob);
         setPreview(url);
@@ -45,7 +52,7 @@ export default function ImageUploader() {
         setIsGenerating(false);
       }
     },
-    [image, toast]
+    [image, toast, fontSize]
   );
 
   const clearImage = () => {
@@ -55,6 +62,12 @@ export default function ImageUploader() {
   };
 
   // Debounce manual caption updates
+  useEffect(() => {
+    if (!image || mode !== "manual" || !caption) return;
+    // Regenerate meme when font size changes
+    generateMeme(caption);
+  }, [fontSize, generateMeme, caption, image, mode]);
+
   useEffect(() => {
     if (!image || mode !== "manual" || !caption) return;
 
@@ -225,10 +238,71 @@ export default function ImageUploader() {
 
               {mode === "manual" && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-1 duration-500">
+                  <div className="flex items-center gap-4 mb-2">
+                    <span className="text-xs text-muted-foreground">Size:</span>
+                    <TooltipProvider>
+                      <div className="flex gap-2">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => setFontSize('small')}
+                              className={`p-1.5 rounded transition-colors ${fontSize === 'small' 
+                                ? 'bg-primary text-primary-foreground' 
+                                : 'bg-muted hover:bg-muted/80'}`}
+                            >
+                              <TextQuote className="h-3.5 w-3.5" />
+                              <span className="sr-only">Small Font</span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="flex items-center gap-2">
+                            <TextQuote className="h-4 w-4" />
+                            <span>Small Font</span>
+                          </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => setFontSize('medium')}
+                              className={`p-1.5 rounded transition-colors ${fontSize === 'medium' 
+                                ? 'bg-primary text-primary-foreground' 
+                                : 'bg-muted hover:bg-muted/80'}`}
+                            >
+                              <Type className="h-3.5 w-3.5" />
+                              <span className="sr-only">Medium Font</span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="flex items-center gap-2">
+                            <Type className="h-4 w-4" />
+                            <span>Medium Font</span>
+                          </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => setFontSize('large')}
+                              className={`p-1.5 rounded transition-colors ${fontSize === 'large' 
+                                ? 'bg-primary text-primary-foreground' 
+                                : 'bg-muted hover:bg-muted/80'}`}
+                            >
+                              <Heading className="h-3.5 w-3.5" />
+                              <span className="sr-only">Large Font</span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="flex items-center gap-2">
+                            <Heading className="h-4 w-4" />
+                            <span>Large Font</span>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TooltipProvider>
+                  </div>
                   <Textarea
-                    placeholder="Write your caption..."
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
+                    className="mt-2"
+                    placeholder="Enter your caption..."
                   />
                 </div>
               )}

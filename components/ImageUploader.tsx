@@ -7,6 +7,7 @@ import { ImageDropZone } from "@/components/ImageDropZone";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { generateMemeInBrowser } from "@/lib/caption";
 import { LoaderCircle } from "lucide-react";
+import { useToast } from "./ui/use-toast";
 
 export default function ImageUploader() {
   const { session } = useSupabaseSession();
@@ -17,6 +18,7 @@ export default function ImageUploader() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mode, setMode] = useState<"ai" | "manual" | undefined>("ai");
+  const { toast } = useToast();
 
   const generateMeme = useCallback(
     async (text: string) => {
@@ -94,6 +96,10 @@ export default function ImageUploader() {
       const res = await fetch("/api/save-meme", {
         method: "POST",
         body: formData,
+      });
+      toast({
+        title: "Success",
+        description: "Meme saved ",
       });
       console.log(res.ok ? "Saved!" : "Failed: " + (await res.json()).error);
     } catch (error) {

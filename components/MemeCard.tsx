@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LoaderCircle, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface MemeCardProps {
   id: string;
@@ -14,6 +15,7 @@ interface MemeCardProps {
 
 export function MemeCard({ id, imageUrl, caption }: MemeCardProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -29,10 +31,18 @@ export function MemeCard({ id, imageUrl, caption }: MemeCardProps) {
         throw new Error(error.message || "Failed to delete meme");
       }
 
+      toast({
+        title: "Success",
+        description: "Meme deleted ",
+      });
       router.refresh();
     } catch (error) {
       console.error("Error deleting meme:", error);
-      alert("Failed to delete meme");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete meme",
+      });
       setIsDeleting(false);
     }
   };

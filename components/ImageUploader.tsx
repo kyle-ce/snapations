@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ImageDropZone } from "@/components/ImageDropZone";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { generateMemeInBrowser } from "@/lib/caption";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Save, Wand2 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 
 export default function ImageUploader() {
@@ -20,15 +20,32 @@ export default function ImageUploader() {
   const [mode, setMode] = useState<"ai" | "manual" | undefined>("ai");
   const { toast } = useToast();
 
+  // Track if there's a pending meme generation
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const generateMeme = useCallback(
     async (text: string) => {
       if (!image) return;
-      const memeBlob = await generateMemeInBrowser(image, text);
-      setMemeBlob(memeBlob);
-      const url = URL.createObjectURL(memeBlob);
-      setPreview(url);
+      setIsGenerating(true);
+      try {
+        const memeBlob = await generateMemeInBrowser(image, text);
+        setMemeBlob(memeBlob);
+        const url = URL.createObjectURL(memeBlob);
+        setPreview(url);
+      } catch (error) {
+        console.error("Error generating meme:", error);
+        toast({
+          title: "Couldn't Add Caption",
+          description:
+            "We couldn't add your caption to the image. Try a shorter caption or refresh the page.",
+          className:
+            "bg-white dark:bg-white text-destructive dark:text-destructive border-destructive",
+        });
+      } finally {
+        setIsGenerating(false);
+      }
     },
-    [image]
+    [image, toast]
   );
 
   const clearImage = () => {
@@ -42,19 +59,30 @@ export default function ImageUploader() {
     if (!image || mode !== "manual" || !caption) return;
 
     const timer = setTimeout(() => {
-      generateMeme(caption).catch(console.error);
+      generateMeme(caption).catch((error) => {
+        console.error("Error in debounced caption update:", error);
+        toast({
+          title: "Caption Not Updated",
+          description:
+            "We couldn't update your meme with the new caption. Try a shorter caption or refresh the page.",
+          className:
+            "bg-white dark:bg-white text-destructive dark:text-destructive border-destructive",
+        });
+      });
     }, 500); // Wait 500ms after last keystroke
 
     return () => clearTimeout(timer);
-  }, [caption, mode, image, generateMeme]);
+  }, [caption, mode, image, generateMeme, toast]);
 
   const generateCaption = async () => {
     if (!image) return;
     if (!session) {
       toast({
-        variant: "destructive",
-        title: "Authentication Required",
-        description: "Please sign in to use AI caption generation.",
+        title: "Sign In Required",
+        description:
+          "You'll need to sign in to use AI captions. Click the sign in button above.",
+        className:
+          "bg-white dark:bg-white text-destructive dark:text-destructive border-destructive",
       });
       return;
     }
@@ -67,7 +95,10 @@ export default function ImageUploader() {
           method: "POST",
           body: formData,
         });
-        if (!res.ok) throw new Error("Failed to generate caption");
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || "Failed to generate caption");
+        }
         const data = await res.json();
         setCaption(data.caption);
         await generateMeme(data.caption);
@@ -75,21 +106,48 @@ export default function ImageUploader() {
         await generateMeme(caption);
       }
     } catch (error) {
-      console.error("Error generating meme:", error);
-      alert("Error generating meme");
+      console.error("Error generating caption:", error);
+      toast({
+        title: "AI Caption Not Generated",
+        description:
+          "Our AI is having trouble being creative right now. Try uploading a clearer image or try again in a moment.",
+        className:
+          "bg-white dark:bg-white text-destructive dark:text-destructive border-destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    console.log("Session", session);
+  const saveMeme = async () => {
     if (!session) {
-      alert("Please sign in to save your meme.");
+      toast({
+        title: "Sign In Required",
+        description:
+          "You'll need to sign in to save your memes. Click the sign in button above.",
+        className:
+          "bg-white dark:bg-white text-destructive dark:text-destructive border-destructive",
+      });
       return;
     }
+
+    // If we're in manual mode and there's a pending generation, wait for it
+    if (mode === "manual" && isGenerating) {
+      toast({
+        title: "One Moment",
+        description: "We're adding your latest caption to the meme...",
+      });
+      return;
+    }
+
     if (!memeBlob) {
-      alert("No meme image to save.");
+      toast({
+        title: "No Meme to Save",
+        description:
+          "Looks like there's no meme ready to save. Try generating a caption first.",
+        className:
+          "bg-white dark:bg-white text-destructive dark:text-destructive border-destructive",
+      });
       return;
     }
 
@@ -105,17 +163,26 @@ export default function ImageUploader() {
         method: "POST",
         body: formData,
       });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to save meme");
+      }
+
       toast({
-        title: "Success",
-        description: "Meme saved ",
+        title: "Meme Saved!",
+        description: "Your meme is now in your collection.",
+        className:
+          "bg-white dark:bg-white text-green-600 dark:text-green-500 border-green-600 dark:border-green-500",
       });
-      console.log(res.ok ? "Saved!" : "Failed: " + (await res.json()).error);
     } catch (error) {
       console.error("Error saving meme:", error);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to save meme. Please try again.",
+        title: "Save Failed",
+        description:
+          "We couldn't save your meme right now. Try again in a moment.",
+        className:
+          "bg-white dark:bg-white text-destructive dark:text-destructive border-destructive",
       });
     } finally {
       setSaving(false);
@@ -165,49 +232,53 @@ export default function ImageUploader() {
                   />
                 </div>
               )}
-              {mode === "ai" && caption && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-1 duration-500">
-                  <Textarea
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                    className="mt-2"
-                  />
-                </div>
-              )}
 
               <div className="grid gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                {mode === "ai" && (
+                <div className="flex gap-2">
+                  {mode === "ai" && (
+                    <Button
+                      onClick={generateCaption}
+                      disabled={loading || !image}
+                      title={
+                        !session
+                          ? "Sign in to use AI caption generation"
+                          : undefined
+                      }
+                      className="flex-1"
+                    >
+                      {loading ? (
+                        <>
+                          <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="h-4 w-4 mr-2" />
+                          Generate Caption
+                        </>
+                      )}
+                    </Button>
+                  )}
                   <Button
-                    onClick={generateCaption}
-                    disabled={loading || !image}
-                    title={
-                      !session
-                        ? "Sign in to use AI caption generation"
-                        : undefined
-                    }
-                    className="w-full"
+                    onClick={saveMeme}
+                    disabled={saving || !image || isGenerating}
+                    size={mode === "ai" ? "icon" : "default"}
+                    className={mode === "ai" ? "" : "w-full"}
                   >
-                    {loading ? (
-                      <>
-                        <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
-                        Generating...
-                      </>
+                    {saving ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : isGenerating ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
                     ) : (
-                      "Generate AI Caption"
+                      <>
+                        <Save className="h-4 w-4" />
+                        {mode === "manual" && (
+                          <span className="ml-2">Save Meme</span>
+                        )}
+                      </>
                     )}
                   </Button>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={handleSave}
-                  className="w-full"
-                  disabled={!caption}
-                >
-                  {saving && (
-                    <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  Save Meme
-                </Button>
+                </div>
               </div>
             </>
           ) : (

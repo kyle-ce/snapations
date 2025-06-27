@@ -42,31 +42,53 @@ export async function generateMemeInBrowser(
 
       // Text styling
       const maxWidth = img.width * 0.9;
-      const fontSize = img.height / 15;
-      const lineHeight = fontSize * 1.2;
-      ctx.font = `${fontSize}px Impact`;
+      const fontSize = Math.min(img.height / 12, 72); // Cap at 72px but scale with image
+      const lineHeight = fontSize * 1.3; // More spacing between lines
+      ctx.font = `bold ${fontSize}px "Arial Black", Impact`; // Modern font stack
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
       const lines = wrapText(ctx, caption.toUpperCase(), maxWidth);
 
-      // Calculate background height and Y position
+      // Calculate text position (centered vertically)
       const verticalPadding = 20;
       const textBlockHeight = lines.length * lineHeight + verticalPadding * 2;
       const textY = img.height * 0.75 - textBlockHeight / 2;
 
-      // Draw black background bar
-      ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-      ctx.fillRect(0, textY, img.width, textBlockHeight);
-
-      // Draw caption lines (white fill + black stroke)
+      // Enhanced text effects for better visibility without background
       ctx.fillStyle = "white";
       ctx.strokeStyle = "black";
-      ctx.lineWidth = 4;
+      ctx.lineWidth = Math.max(6, fontSize / 8); // Thicker stroke for better contrast
+      
+      // Multiple shadow layers for better visibility
+      const shadowOffsets = [
+        { x: -2, y: -2 },
+        { x: 2, y: -2 },
+        { x: -2, y: 2 },
+        { x: 2, y: 2 }
+      ];
 
       lines.forEach((line, index) => {
         const y = textY + verticalPadding + index * lineHeight;
+        
+        // Draw multiple black shadows for better contrast
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = 4;
+        shadowOffsets.forEach(offset => {
+          ctx.shadowOffsetX = offset.x;
+          ctx.shadowOffsetY = offset.y;
+          ctx.strokeText(line, img.width / 2, y);
+        });
+
+        // Clear shadows for the main text
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Draw thick stroke
         ctx.strokeText(line, img.width / 2, y);
+        // Draw white fill on top
         ctx.fillText(line, img.width / 2, y);
       });
 

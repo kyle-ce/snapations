@@ -26,7 +26,7 @@ export default function Header() {
           href="/"
           className="text-2xl p-2 font-bold tracking-tight hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring rounded-md"
         >
-          Snapations
+          Snaptions
         </Link>
 
         {session?.user ? (

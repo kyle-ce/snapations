@@ -38,7 +38,7 @@ export default function SignInPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">
-            Sign in to Snapations
+            Sign in to Snaptions
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">

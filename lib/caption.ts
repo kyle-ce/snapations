@@ -28,7 +28,7 @@ export function wrapText(
 export async function generateMemeInBrowser(
   imageFile: File,
   caption: string,
-  fontSize: 'small' | 'medium' | 'large' = 'medium'
+  fontSize: "small" | "medium" | "large" = "medium"
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -44,7 +44,8 @@ export async function generateMemeInBrowser(
       // Text styling
       const maxWidth = img.width * 0.9;
       const baseFontSize = Math.min(img.height / 12, 72); // Base size that scales with image
-      const fontSizeMultiplier = fontSize === 'small' ? 0.8 : fontSize === 'large' ? 1.2 : 1;
+      const fontSizeMultiplier =
+        fontSize === "small" ? 0.8 : fontSize === "large" ? 1.2 : 1;
       const actualFontSize = baseFontSize * fontSizeMultiplier;
       const lineHeight = Math.round(actualFontSize * 1.3); // More spacing between lines
       ctx.font = `bold ${actualFontSize}px "Arial Black", Impact`; // Modern font stack

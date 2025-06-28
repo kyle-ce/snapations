@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="bg-muted px-6 py-10 border-t">
       <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
         <div className="text-center sm:text-left">
-          <p className="font-bold text-foreground">Snapations</p>
+          <p className="font-bold text-foreground">Snaptions</p>
           <p className="text-xs">
             © {new Date().getFullYear()} All memes reserved.
           </p>

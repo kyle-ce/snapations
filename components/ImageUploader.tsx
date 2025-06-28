@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSupabaseSession } from "@/lib/supabase/hooks/useSession";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -12,7 +12,14 @@ import {
 import { ImageDropZone } from "@/components/ImageDropZone";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { generateMemeInBrowser } from "@/lib/caption";
-import { LoaderCircle, Save, Wand2, TextQuote, Type, Heading } from "lucide-react";
+import {
+  LoaderCircle,
+  Save,
+  Wand2,
+  TextQuote,
+  Type,
+  Heading,
+} from "lucide-react";
 import { useToast } from "./ui/use-toast";
 
 export default function ImageUploader() {
@@ -24,7 +31,9 @@ export default function ImageUploader() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [mode, setMode] = useState<"ai" | "manual" | undefined>("ai");
-  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [fontSize, setFontSize] = useState<"small" | "medium" | "large">(
+    "medium"
+  );
   const { toast } = useToast();
 
   // Track if there's a pending meme generation
@@ -203,7 +212,7 @@ export default function ImageUploader() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-card animate-in fade-in duration-500">
+    <div className="w-full max-w-4xl mx-auto rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-card shadow-xl animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
         <div className="w-full">
           <ImageDropZone
@@ -245,16 +254,21 @@ export default function ImageUploader() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
-                              onClick={() => setFontSize('small')}
-                              className={`p-1.5 rounded transition-colors ${fontSize === 'small' 
-                                ? 'bg-primary text-primary-foreground' 
-                                : 'bg-muted hover:bg-muted/80'}`}
+                              onClick={() => setFontSize("small")}
+                              className={`p-1.5 rounded transition-colors ${
+                                fontSize === "small"
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted hover:bg-muted/80"
+                              }`}
                             >
                               <TextQuote className="h-3.5 w-3.5" />
                               <span className="sr-only">Small Font</span>
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent side="bottom" className="flex items-center gap-2">
+                          <TooltipContent
+                            side="bottom"
+                            className="flex items-center gap-2"
+                          >
                             <TextQuote className="h-4 w-4" />
                             <span>Small Font</span>
                           </TooltipContent>
@@ -263,16 +277,21 @@ export default function ImageUploader() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
-                              onClick={() => setFontSize('medium')}
-                              className={`p-1.5 rounded transition-colors ${fontSize === 'medium' 
-                                ? 'bg-primary text-primary-foreground' 
-                                : 'bg-muted hover:bg-muted/80'}`}
+                              onClick={() => setFontSize("medium")}
+                              className={`p-1.5 rounded transition-colors ${
+                                fontSize === "medium"
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted hover:bg-muted/80"
+                              }`}
                             >
                               <Type className="h-3.5 w-3.5" />
                               <span className="sr-only">Medium Font</span>
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent side="bottom" className="flex items-center gap-2">
+                          <TooltipContent
+                            side="bottom"
+                            className="flex items-center gap-2"
+                          >
                             <Type className="h-4 w-4" />
                             <span>Medium Font</span>
                           </TooltipContent>
@@ -281,16 +300,21 @@ export default function ImageUploader() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
-                              onClick={() => setFontSize('large')}
-                              className={`p-1.5 rounded transition-colors ${fontSize === 'large' 
-                                ? 'bg-primary text-primary-foreground' 
-                                : 'bg-muted hover:bg-muted/80'}`}
+                              onClick={() => setFontSize("large")}
+                              className={`p-1.5 rounded transition-colors ${
+                                fontSize === "large"
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted hover:bg-muted/80"
+                              }`}
                             >
                               <Heading className="h-3.5 w-3.5" />
                               <span className="sr-only">Large Font</span>
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent side="bottom" className="flex items-center gap-2">
+                          <TooltipContent
+                            side="bottom"
+                            className="flex items-center gap-2"
+                          >
                             <Heading className="h-4 w-4" />
                             <span>Large Font</span>
                           </TooltipContent>

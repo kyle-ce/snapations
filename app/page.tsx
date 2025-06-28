@@ -1,4 +1,5 @@
 import ImageUploader from "@/components/ImageUploader";
+import { MyMemesPreview } from "@/components/MyMemesPreview";
 
 export default function HomePage() {
   return (
@@ -12,8 +13,13 @@ export default function HomePage() {
           own!
         </p>
       </section>
+      {/* <StepsCarousel /> */}
 
-      <ImageUploader />
+      <div className="mb-16">
+        <ImageUploader />
+      </div>
+
+      <MyMemesPreview />
     </main>
   );
 }

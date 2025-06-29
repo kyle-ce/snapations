@@ -1,32 +1,36 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useSupabaseSession } from '@/lib/supabase/hooks/useSession';
-import { ImageDropZone } from '@/components/ImageDropZone';
-import { useToast } from '@/components/ui/use-toast';
-import { CaptionControls } from './CaptionControls';
-import { MemeActions } from './MemeActions';
-import { useImagePreview } from '@/hooks/useImagePreview';
-import { useMemeGeneration } from '@/hooks/useMemeGeneration';
-import { useClipboard } from '@/hooks/useClipboard';
+import { useState, useEffect } from "react";
+import { useSupabaseSession } from "@/lib/supabase/hooks/useSession";
+import { ImageDropZone } from "@/components/ImageDropZone";
+import { useToast } from "@/components/ui/use-toast";
+import { CaptionControls } from "./CaptionControls";
+import { MemeActions } from "./MemeActions";
+import { useImagePreview } from "@/hooks/useImagePreview";
+import { useMemeGeneration } from "@/hooks/useMemeGeneration";
+import { useClipboard } from "@/hooks/useClipboard";
 
 export function MemeEditor() {
   const { session } = useSupabaseSession();
   const { toast } = useToast();
-  const { image, preview, handleImageChange, clearImage, setPreview } = useImagePreview();
-  const { memeBlob, isGenerating, loading, generateMeme, generateAICaption } = useMemeGeneration(image);
+  const { image, preview, handleImageChange, clearImage, setPreview } =
+    useImagePreview();
+  const { memeBlob, isGenerating, loading, generateMeme, generateAICaption } =
+    useMemeGeneration(image);
   const { copying, copyBlobToClipboard } = useClipboard();
 
-  const [caption, setCaption] = useState<string>('');
-  const [mode, setMode] = useState<'ai' | 'manual' | undefined>('ai');
-  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [caption, setCaption] = useState<string>("");
+  const [mode, setMode] = useState<"ai" | "manual" | undefined>("ai");
+  const [fontSize, setFontSize] = useState<"small" | "medium" | "large">(
+    "medium"
+  );
 
   // Handle manual caption updates with debouncing
   useEffect(() => {
-    if (!image || mode !== 'manual' || !caption) return;
+    if (!image || mode !== "manual" || !caption) return;
 
     const timer = setTimeout(() => {
-      generateMeme(caption, fontSize).then(url => {
+      generateMeme(caption, fontSize).then((url) => {
         if (url) setPreview(url);
       });
     }, 500);
@@ -37,9 +41,11 @@ export function MemeEditor() {
   const handleGenerateCaption = async () => {
     if (!session) {
       toast({
-        title: 'Sign In Required',
-        description: 'You\'ll need to sign in to use AI captions. Click the sign in button above.',
-        className: 'bg-white dark:bg-white text-destructive dark:text-destructive border-destructive',
+        title: "Sign In Required",
+        description:
+          "You'll need to sign in to use AI captions. Click the sign in button above.",
+        className:
+          "bg-white dark:bg-white text-destructive dark:text-destructive border-destructive",
       });
       return;
     }
@@ -53,10 +59,10 @@ export function MemeEditor() {
   };
 
   const handleCopyMeme = async () => {
-    if (mode === 'manual' && isGenerating) {
+    if (mode === "manual" && isGenerating) {
       toast({
-        title: 'One Moment',
-        description: 'We\'re adding your latest caption to the meme...',
+        title: "One Moment",
+        description: "We're adding your latest caption to the meme...",
       });
       return;
     }
@@ -72,13 +78,13 @@ export function MemeEditor() {
             preview={preview}
             onChange={(file) => {
               handleImageChange(file);
-              setCaption('');
+              setCaption("");
             }}
             onClear={clearImage}
           />
         </div>
 
-        <div className={`space-y-6 ${!image ? 'hidden md:block' : ''}`}>
+        <div className={`space-y-6 ${!image ? "hidden md:block" : ""}`}>
           {image ? (
             <>
               <CaptionControls

@@ -41,59 +41,78 @@ export async function generateMemeInBrowser(
       // Draw the original image
       ctx.drawImage(img, 0, 0, img.width, img.height);
 
-      // Text styling
-      const maxWidth = img.width * 0.9;
-      const baseFontSize = Math.min(img.height / 12, 72); // Base size that scales with image
+      // Calculate base font size based on image dimensions
+      const imageArea = img.width * img.height;
+      const shortestSide = Math.min(img.width, img.height);
+      const longestSide = Math.max(img.width, img.height);
+      const aspectRatio = longestSide / shortestSide;
+  
+      // Base size calculation that considers both dimensions and aspect ratio
+      const baseSize = Math.sqrt(imageArea) / 25; // Scales with total image area
+      const aspectRatioAdjustment = Math.pow(aspectRatio, 0.3); // Subtle adjustment for extreme ratios
+      const baseFontSize = Math.min(baseSize / aspectRatioAdjustment, 120); // Cap at 120px
+  
+      // Apply user-selected size modifier with larger scale differences
       const fontSizeMultiplier =
-        fontSize === "small" ? 0.8 : fontSize === "large" ? 1.2 : 1;
+        fontSize === "small" ? 1.0 : fontSize === "large" ? 2.0 : 1.5;
       const actualFontSize = baseFontSize * fontSizeMultiplier;
+  
+      // Text width constraint
+      const maxWidth = img.width * 0.9;
       const lineHeight = Math.round(actualFontSize * 1.3); // More spacing between lines
-      ctx.font = `bold ${actualFontSize}px "Arial Black", Impact`; // Modern font stack
+      ctx.font = `bold ${actualFontSize}px Impact, "Arial Black"`; // Classic meme font
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-
-      const lines = wrapText(ctx, caption.toUpperCase(), maxWidth);
-
-      // Calculate text position (centered vertically)
-      const verticalPadding = 20;
-      const textBlockHeight = lines.length * lineHeight + verticalPadding * 2;
-      const textY = img.height * 0.75 - textBlockHeight / 2;
-
-      // Enhanced text effects for better visibility without background
-      ctx.fillStyle = "white";
       ctx.strokeStyle = "black";
-      ctx.lineWidth = Math.max(6, fontSize / 8); // Thicker stroke for better contrast
+      ctx.fillStyle = "white";
+      
+      // Thicker outline for meme style
+      ctx.lineWidth = Math.max(4, actualFontSize / 15);
+      ctx.lineJoin = "round"; // Smooth corners
+      ctx.miterLimit = 2;
 
-      // Multiple shadow layers for better visibility
-      const shadowOffsets = [
-        { x: -2, y: -2 },
-        { x: 2, y: -2 },
-        { x: -2, y: 2 },
-        { x: 2, y: 2 },
-      ];
+      // Split text into lines that fit within maxWidth
+      const words = caption.toUpperCase().split(" ");
+      const lines: string[] = [];
+      let currentLine = words[0];
 
-      lines.forEach((line, index) => {
-        const y = textY + verticalPadding + index * lineHeight;
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = ctx.measureText(currentLine + " " + word).width;
+        if (width < maxWidth) {
+          currentLine += " " + word;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
 
-        // Draw multiple black shadows for better contrast
-        ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-        ctx.shadowBlur = 4;
-        shadowOffsets.forEach((offset) => {
-          ctx.shadowOffsetX = offset.x;
-          ctx.shadowOffsetY = offset.y;
-          ctx.strokeText(line, img.width / 2, y);
+      // Calculate total height of text block
+      const totalHeight = lines.length * lineHeight;
+      let y = (img.height - totalHeight) / 2; // Center text vertically
+
+      // Draw each line with enhanced outline
+      lines.forEach((line) => {
+        // Multiple outline passes for thickness
+        const outlinePasses = [
+          { x: -1, y: -1 }, { x: 1, y: -1 },
+          { x: -1, y: 1 }, { x: 1, y: 1 },
+          { x: -2, y: 0 }, { x: 2, y: 0 },
+          { x: 0, y: -2 }, { x: 0, y: 2 }
+        ];
+
+        // Draw multiple outline passes
+        outlinePasses.forEach(({x, y: offsetY}) => {
+          ctx.strokeText(line, img.width / 2 + x, y + offsetY);
         });
 
-        // Clear shadows for the main text
-        ctx.shadowColor = "transparent";
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-
-        // Draw thick stroke
+        // Main outline
         ctx.strokeText(line, img.width / 2, y);
-        // Draw white fill on top
+        
+        // White fill
         ctx.fillText(line, img.width / 2, y);
+        y += lineHeight;
       });
 
       canvas.toBlob((blob) => {

@@ -13,9 +13,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      <div className="flex flex-col gap-8">
-        <MemeEditor />
-      </div>
+      <MemeEditor />
     </main>
   );
 }

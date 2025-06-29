@@ -45,12 +45,12 @@ export default function Header() {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
+              {/* <DropdownMenuItem asChild>
                 <Link href="/memes" className="w-full">
                   <FiUser className="mr-2 h-4 w-4" />
                   My Memes
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem onClick={handleSignOut}>
                 <FiLogOut className="mr-2 h-4 w-4" />
                 Sign out
